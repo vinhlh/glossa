@@ -1,4 +1,4 @@
-# glossa
+# Glossa
 Create flashcards from Oxford Advanced Learner's Dictionary directly via Chrome extension
 
 ## Features
@@ -15,6 +15,6 @@ Create flashcards from Oxford Advanced Learner's Dictionary directly via Chrome 
 
 Coming soon.
 
-### Genarate Anki cards to use offline
+### Generate Anki cards to use offline
 
 Coming soon.
