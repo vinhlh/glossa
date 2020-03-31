@@ -54,6 +54,7 @@ const Status = styled.div`
 
 const Popup = () => {
   const [btnText, setBtnText] = useState('Login in with Google')
+  const [btnColor, setBtnColor] = useState('primary')
   const [currentUser, setCurrentUser] = useState(null)
   const [disabled, setDisabled] = useState(true)
 
@@ -74,11 +75,12 @@ const Popup = () => {
       if (user) {
         const { displayName, email } = user
         setBtnText('Sign out')
+        setBtnColor('secondary')
         setCurrentUser({ displayName, email })
       } else {
         setBtnText('Sign-in with Google')
+        setBtnColor('primary')
       }
-
       setDisabled(false)
     })
   }, [])
@@ -95,7 +97,7 @@ const Popup = () => {
 
       <Button
         variant="contained"
-        color="secondary"
+        color={btnColor}
         onClick={startSignIn}
         disabled={disabled}
       >
