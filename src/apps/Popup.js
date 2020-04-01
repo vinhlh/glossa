@@ -31,13 +31,11 @@ const Popup = () => {
   const { toggleLogIn } = useLogIn()
 
   useAuthStateChanged(user => {
-    console.warn('useAuthStateChanged')
     if (user) {
       const { displayName, email } = user
       setBtnText('Sign out')
       setBtnColor('secondary')
       setCurrentUser({ displayName, email })
-      console.warn('user', user)
     } else {
       setBtnText('Sign-in with Google')
       setBtnColor('primary')

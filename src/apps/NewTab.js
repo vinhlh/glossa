@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import styled, { createGlobalStyle } from 'styled-components'
+import styled from 'styled-components'
 import * as firebase from 'firebase'
 import Card from '@material-ui/core/Card'
 import CardHeader from '@material-ui/core/CardHeader'
@@ -15,7 +15,6 @@ import {
   makeStyles,
   ThemeProvider
 } from '@material-ui/core/styles'
-import CircularProgress from '@material-ui/core/CircularProgress'
 import clsx from 'clsx'
 
 import CssBaseline from '@material-ui/core/CssBaseline'
@@ -27,9 +26,6 @@ import pink from '@material-ui/core/colors/pink'
 
 import configs from '../configs/firebase'
 import ItemCard from '../components/Card'
-
-const GlobalStyle = createGlobalStyle`
-`
 
 const Container = styled.div`
   display: flex;
@@ -88,7 +84,7 @@ const useUserDataFromFirebase = () => {
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (!user) {
-        console.warn('Must login')
+        setCurrentUser(null)
         return
       }
 
@@ -213,79 +209,82 @@ const NewTab = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <GlobalStyle />
       <CssBaseline />
       <Container>
-        {Object.keys(userWords).length === 0 ? (
-          <CircularProgress />
-        ) : (
+        {currentUser ? (
           <>
-            {currentUser && (
-              <Hey>
-                Hi <b>{currentUser.displayName}</b>,<br /> there are your
-                flashcards! Try your best 💪
-              </Hey>
+            {Object.keys(userWords).length === 0 ? (
+              <Hey>You have no flashcard yet! Keep adding!</Hey>
+            ) : (
+              <>
+                <Hey>
+                  Hi <b>{currentUser.displayName}</b>,<br /> there are your
+                  flashcards! Try your best 💪
+                </Hey>
+
+                <Chips>
+                  {Object.entries(wordsByTopic).map(([t, values]) => (
+                    <Chip
+                      avatar={<Avatar>{values.length}</Avatar>}
+                      label={`${t}`}
+                      key={t}
+                      variant="outlined"
+                      onClick={() => setActiveTopic(t) && setActiveIndex(0)}
+                      color={t === activeTopic ? 'primary' : ''}
+                    />
+                  ))}
+                </Chips>
+
+                <Card className={classes.card}>
+                  <CardHeader
+                    action={
+                      <IconButton
+                        className={clsx(classes.expand, {
+                          [classes.expandOpen]: expanded
+                        })}
+                        onClick={handleExpandClick}
+                        aria-expanded={expanded}
+                        aria-label="Show Phonetics"
+                      >
+                        <ExpandMoreIcon />
+                      </IconButton>
+                    }
+                  />
+                  <CardContent style={{ marginTop: -72 }}>
+                    {renderSearchResult(expanded)}
+                  </CardContent>
+                  <MobileStepper
+                    steps={maxIndex}
+                    position="static"
+                    variant="text"
+                    activeStep={activeIndex}
+                    nextButton={
+                      <Button
+                        size="small"
+                        onClick={onClickNext}
+                        disabled={activeIndex === maxIndex - 1}
+                      >
+                        Next
+                        <KeyboardArrowRight />
+                      </Button>
+                    }
+                    backButton={
+                      <Button
+                        size="small"
+                        onClick={onClickBack}
+                        disabled={activeIndex === 0}
+                      >
+                        <KeyboardArrowLeft />
+                        Back
+                      </Button>
+                    }
+                  />
+                </Card>
+              </>
             )}
-
-            <Chips>
-              {Object.entries(wordsByTopic).map(([t, values]) => (
-                <Chip
-                  avatar={<Avatar>{values.length}</Avatar>}
-                  label={`${t}`}
-                  key={t}
-                  variant="outlined"
-                  onClick={() => setActiveTopic(t) && setActiveIndex(0)}
-                  color={t === activeTopic ? 'primary' : ''}
-                />
-              ))}
-            </Chips>
-
-            <Card className={classes.card}>
-              <CardHeader
-                action={
-                  <IconButton
-                    className={clsx(classes.expand, {
-                      [classes.expandOpen]: expanded
-                    })}
-                    onClick={handleExpandClick}
-                    aria-expanded={expanded}
-                    aria-label="Show Phonetics"
-                  >
-                    <ExpandMoreIcon />
-                  </IconButton>
-                }
-              />
-              <CardContent style={{ marginTop: -72 }}>
-                {renderSearchResult(expanded)}
-              </CardContent>
-              <MobileStepper
-                steps={maxIndex}
-                position="static"
-                variant="text"
-                activeStep={activeIndex}
-                nextButton={
-                  <Button
-                    size="small"
-                    onClick={onClickNext}
-                    disabled={activeIndex === maxIndex - 1}
-                  >
-                    Next
-                    <KeyboardArrowRight />
-                  </Button>
-                }
-                backButton={
-                  <Button
-                    size="small"
-                    onClick={onClickBack}
-                    disabled={activeIndex === 0}
-                  >
-                    <KeyboardArrowLeft />
-                    Back
-                  </Button>
-                }
-              />
-            </Card>
           </>
+        ) : (
+          <Hey>You must login first!<br /> By clicking on the extension icon.</Hey>
         )}
       </Container>
     </ThemeProvider>
