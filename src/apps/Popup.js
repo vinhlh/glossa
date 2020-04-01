@@ -4,36 +4,7 @@ import * as firebase from 'firebase'
 import Button from '@material-ui/core/Button'
 import Typography from '@material-ui/core/Typography'
 
-import configs from '../configs/firebase'
-
-function startAuth(interactive) {
-  window.chrome.identity.getAuthToken({ interactive: !!interactive }, function(
-    token
-  ) {
-    if (window.chrome.runtime.lastError && !interactive) {
-      console.log('It was not possible to get a token programmatically.')
-    } else if (window.chrome.runtime.lastError) {
-      console.error(window.chrome.runtime.lastError)
-    } else if (token) {
-      var credential = firebase.auth.GoogleAuthProvider.credential(null, token)
-      firebase
-        .auth()
-        .signInWithCredential(credential)
-        .catch(function(error) {
-          if (error.code === 'auth/invalid-credential') {
-            window.chrome.identity.removeCachedAuthToken(
-              { token: token },
-              function() {
-                startAuth(interactive)
-              }
-            )
-          }
-        })
-    } else {
-      console.error('The OAuth Token was null')
-    }
-  })
-}
+import { useLogIn, useAuthStateChanged } from '../helpers/auth'
 
 const Header = styled.div`
   font-size: 24px;
@@ -58,32 +29,23 @@ const Popup = () => {
   const [currentUser, setCurrentUser] = useState(null)
   const [disabled, setDisabled] = useState(true)
 
-  const startSignIn = () => {
-    setDisabled(true)
+  const { toggleLogIn } = useLogIn()
 
-    if (firebase.auth().currentUser) {
-      firebase.auth().signOut()
+  useAuthStateChanged(user => {
+    console.warn('useAuthStateChanged')
+    if (user) {
+      const { displayName, email } = user
+      setBtnText('Sign out')
+      setBtnColor('secondary')
+      setCurrentUser({ displayName, email })
+      console.warn('user', user)
     } else {
-      startAuth(true)
+      setBtnText('Sign-in with Google')
+      setBtnColor('primary')
+      setCurrentUser(null)
     }
-  }
-
-  useEffect(() => {
-    firebase.initializeApp(configs)
-
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        const { displayName, email } = user
-        setBtnText('Sign out')
-        setBtnColor('secondary')
-        setCurrentUser({ displayName, email })
-      } else {
-        setBtnText('Sign-in with Google')
-        setBtnColor('primary')
-      }
-      setDisabled(false)
-    })
-  }, [])
+    setDisabled(false)
+  })
 
   return (
     <Container>
@@ -98,7 +60,7 @@ const Popup = () => {
       <Button
         variant="contained"
         color={btnColor}
-        onClick={startSignIn}
+        onClick={toggleLogIn}
         disabled={disabled}
       >
         {btnText}
