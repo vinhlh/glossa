@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import * as firebase from 'firebase'
 import Card from '@material-ui/core/Card'
@@ -10,17 +10,25 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import MobileStepper from '@material-ui/core/MobileStepper'
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight'
-import { makeStyles } from '@material-ui/core/styles'
-import clsx from 'clsx'
+import {
+  createMuiTheme,
+  makeStyles,
+  ThemeProvider
+} from '@material-ui/core/styles'
 import CircularProgress from '@material-ui/core/CircularProgress'
+import clsx from 'clsx'
+
+import CssBaseline from '@material-ui/core/CssBaseline'
+import Chip from '@material-ui/core/Chip'
+import Avatar from '@material-ui/core/Avatar'
+
+import blue from '@material-ui/core/colors/blue'
+import pink from '@material-ui/core/colors/pink'
 
 import configs from '../configs/firebase'
 import ItemCard from '../components/Card'
 
 const GlobalStyle = createGlobalStyle`
-   body {
-      background-color: #333;
-   }
 `
 
 const Container = styled.div`
@@ -54,8 +62,10 @@ function shuffleArray(array) {
 
 const useStyles = makeStyles(theme => ({
   root: {
-    minWidth: 360,
-    maxWidth: 420
+    flexGrow: 1
+  },
+  card: {
+    minWidth: 360
   },
   expand: {
     transform: 'rotate(0deg)',
@@ -118,16 +128,74 @@ const useUserDataFromFirebase = () => {
   }
 }
 
+const TOPIC_ALL = 'All'
+
+const useWordsByTopic = userWords => {
+  const [activeTopic, setActiveTopic] = useState(TOPIC_ALL)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const wordsByTopic = useMemo(
+    () =>
+      userWords.reduce(
+        (prev, w) => {
+          ;(w.topics || []).forEach(t => {
+            prev[t] = [...(prev[t] || []), w]
+            prev[TOPIC_ALL] = [...prev[TOPIC_ALL], w]
+          })
+
+          return prev
+        },
+        { [TOPIC_ALL]: [] }
+      ),
+    [userWords]
+  )
+
+  console.warn('wordsByTopic', userWords, wordsByTopic)
+
+  return {
+    wordsByTopic,
+    activeTopic,
+    activeIndex,
+    setActiveIndex,
+    setActiveTopic
+  }
+}
+
+const theme = createMuiTheme({
+  palette: {
+    type: 'dark',
+    primary: blue,
+    secondary: pink
+  }
+})
+
+const Chips = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+
+  > div {
+    margin: 4px;
+  }
+`
+
 const NewTab = () => {
   const classes = useStyles()
-  const [activeIndex, setActiveIndex] = useState(0)
   const [expanded, setExpanded] = React.useState(false)
 
   const { userWords, currentUser } = useUserDataFromFirebase()
-  const maxIndex = userWords.length
+
+  const {
+    wordsByTopic,
+    activeTopic,
+    setActiveTopic,
+    activeIndex,
+    setActiveIndex
+  } = useWordsByTopic(userWords)
+  const maxIndex = wordsByTopic[activeTopic].length
 
   const onClickNext = () =>
-    activeIndex < userWords.length - 1 && setActiveIndex(activeIndex + 1)
+    activeIndex < maxIndex - 1 && setActiveIndex(activeIndex + 1)
 
   const onClickBack = () => activeIndex > 0 && setActiveIndex(activeIndex - 1)
 
@@ -144,8 +212,9 @@ const NewTab = () => {
   }
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <GlobalStyle />
+      <CssBaseline />
       <Container>
         {Object.keys(userWords).length === 0 ? (
           <CircularProgress />
@@ -157,7 +226,21 @@ const NewTab = () => {
                 flashcards! Try your best 💪
               </Hey>
             )}
-            <Card className={classes.root}>
+
+            <Chips>
+              {Object.entries(wordsByTopic).map(([t, values]) => (
+                <Chip
+                  avatar={<Avatar>{values.length}</Avatar>}
+                  label={`${t}`}
+                  key={t}
+                  variant="outlined"
+                  onClick={() => setActiveTopic(t) && setActiveIndex(0)}
+                  color={t === activeTopic ? 'primary' : ''}
+                />
+              ))}
+            </Chips>
+
+            <Card className={classes.card}>
               <CardHeader
                 action={
                   <IconButton
@@ -205,7 +288,7 @@ const NewTab = () => {
           </>
         )}
       </Container>
-    </>
+    </ThemeProvider>
   )
 }
 
