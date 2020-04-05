@@ -1,7 +1,7 @@
 {
   "name": "Glossa",
   "description": "Glossa",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "manifest_version": 2,
   "content_scripts": [
     {
@@ -25,7 +25,7 @@
   "chrome_url_overrides": {
     "newtab": "index.html?app=NewTab"
   },
-  "permissions": ["tabs", "http://*/*", "https://*/*", "identity"],
+  "permissions": ["http://*/*", "https://*/*", "identity"],
   "icons": {
     "16": "images/icon-19.png",
     "48": "images/icon-48.png",
