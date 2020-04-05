@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import root from 'react-shadow'
 
 const propTypes = {
-  html: PropTypes.string
+  html: PropTypes.string,
 }
 
 const Container = styled.div`
@@ -41,20 +41,27 @@ const StyledOxfordHTMLContent = ({ html }) => {
       elements = [
         ...shadowNode.current.shadowRoot.querySelectorAll(
           '.unbox .box_title, .unbox .heading'
-        )
+        ),
       ]
 
-      elements.forEach(el => el.addEventListener('click', toggleCollapse))
+      elements.forEach((el) => el.addEventListener('click', toggleCollapse))
     }, EVENT_LISTENING_DELAY)
 
     return () => {
       clearTimeout(timeout)
-      elements.forEach(el => el.removeEventListener('click', toggleCollapse))
+      elements.forEach((el) => el.removeEventListener('click', toggleCollapse))
     }
   }, [html])
 
   return (
     <root.div ref={shadowNode} mode="open">
+      <style type="text/css">
+        {`
+        html, :host, :root {
+            font-size: 16px;
+        }
+        `}
+      </style>
       <link rel="stylesheet" type="text/css" href={OALD_CSS_URL} />
       <Container dangerouslySetInnerHTML={{ __html: html }}></Container>
     </root.div>
