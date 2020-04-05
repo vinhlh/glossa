@@ -7,6 +7,7 @@ import Divider from '@material-ui/core/Divider'
 import IconButton from '@material-ui/core/IconButton'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import SearchIcon from '@material-ui/icons/Search'
+import PlayIcon from '@material-ui/icons/PlayArrowOutlined'
 import FavoriteIcon from '@material-ui/icons/Favorite'
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 
@@ -16,14 +17,14 @@ import { STORE_WORD, LOOK_UP } from '../constants/messageType'
 
 const PopupContainer = styled.div`
   position: fixed;
-  top: ${props => props.top}px;
-  left: ${props => props.left}px;
-  margin-top: ${props => props.offset}px;
+  top: ${(props) => props.top}px;
+  left: ${(props) => props.left}px;
+  margin-top: ${(props) => props.offset}px;
   background: #1a3561;
   color: #fff;
   z-index: 99999;
   font-size: 11px;
-  padding: 2px 8px;
+  padding: 0px;
   user-select: none;
   text-transform: uppercase;
   font-weight: bold;
@@ -44,6 +45,21 @@ const PopupContent = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+`
+
+const Button = styled.button`
+  display: block;
+  padding: 4px 8px;
+  background: rgb(0, 0, 0, ${(props) => (props.right ? 0.2 : 0)});
+  color: rgb(255, 255, 255, 0.75);
+  border: none;
+  cursor: pointer;
+  outline: none;
+
+  :hover {
+    color: rgb(255, 255, 255, 1);
+    border: none;
+  }
 `
 
 const SidebarContent = styled.div`
@@ -96,27 +112,27 @@ const Copyright = styled.div`
 
 const drawerWidth = 360
 
-const styles = theme => ({
+const styles = (theme) => ({
   drawer: {
     width: drawerWidth,
-    flexShrink: 0
+    flexShrink: 0,
   },
   drawerPaper: {
     width: drawerWidth,
-    zIndex: 99998
+    zIndex: 99998,
   },
   drawerHeader: {
     display: 'flex',
     alignItems: 'center',
     padding: theme.spacing(0, 2),
     ...theme.mixins.toolbar,
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
   },
   drawerFooter: {
     padding: theme.spacing(0, 2),
     ...theme.mixins.toolbar,
-    minHeight: 32
-  }
+    minHeight: 32,
+  },
 })
 
 class App extends Component {
@@ -126,7 +142,8 @@ class App extends Component {
     selection: null,
     searchTerm: '',
     searchResult: null,
-    saved: false
+    saved: false,
+    willPlay: false,
   }
 
   constructor() {
@@ -143,7 +160,7 @@ class App extends Component {
     document.addEventListener('click', this.onTextSelections)
     window.addEventListener('scroll', () => {
       this.setState({
-        selection: null
+        selection: null,
       })
     })
   }
@@ -171,24 +188,25 @@ class App extends Component {
     }
 
     this.setState({
-      selection
+      selection,
     })
   }
 
-  search = searchTerm => {
+  search = (searchTerm, willPlay = false) => {
     this.setState({
       displaySidebar: true,
       searching: true,
       searchTerm,
       searchResult: null,
       error: null,
-      saved: false
+      saved: false,
+      willPlay,
     })
 
     this.searchOnOxford(searchTerm)
   }
 
-  searchOnOxford = searchTerm => {
+  searchOnOxford = (searchTerm) => {
     window.chrome.runtime.sendMessage('', { type: LOOK_UP, searchTerm })
   }
 
@@ -199,26 +217,28 @@ class App extends Component {
     }
 
     const { x, y, height } = selection.getRangeAt(0).getBoundingClientRect()
-    const searchTerm = selection
-      .toString()
-      .toLowerCase()
-      .trim()
+    const searchTerm = selection.toString().toLowerCase().trim()
 
     if (searchTerm === '') {
       return
     }
 
     return (
-      <PopupContainer
-        top={y}
-        left={x}
-        offset={height}
-        onClick={() => this.search(searchTerm)}
-      >
+      <PopupContainer top={y} left={x} offset={height}>
         <PopupContent>
-          {' '}
-          <SearchIcon fontSize="small" style={{ marginRight: 8 }} />{' '}
-          <span>Look up</span>
+          <Button
+            title="Look up"
+            onClick={() => this.search(searchTerm, false)}
+          >
+            <SearchIcon fontSize="small" />
+          </Button>
+          <Button
+            title="Look up & Play"
+            right
+            onClick={() => this.search(searchTerm, true)}
+          >
+            <PlayIcon fontSize="small" />
+          </Button>
         </PopupContent>
       </PopupContainer>
     )
@@ -226,7 +246,7 @@ class App extends Component {
 
   onCloseBtnClick = () => {
     this.setState({
-      displaySidebar: false
+      displaySidebar: false,
     })
   }
 
@@ -235,15 +255,15 @@ class App extends Component {
     window.chrome.runtime.sendMessage('', {
       type: STORE_WORD,
       word: searchTerm,
-      data: searchResult
+      data: searchResult,
     })
     this.setState({
-      saved: true
+      saved: true,
     })
   }
 
   renderSearchResult = () => {
-    const { searching, searchResult, error } = this.state
+    const { searching, searchResult, error, willPlay } = this.state
     if (searching) {
       return <div>Loading</div>
     }
@@ -260,7 +280,7 @@ class App extends Component {
     return (
       <div>
         <PhonGroup>
-          <Audio accent="br" uri={soundBr} />
+          <Audio play={willPlay} accent="br" uri={soundBr} />
           <Phon>{phonBr}</Phon>
         </PhonGroup>
         <PhonGroup>
@@ -282,7 +302,7 @@ class App extends Component {
         anchor="right"
         open={displaySidebar}
         classes={{
-          paper: this.props.classes.drawerPaper
+          paper: this.props.classes.drawerPaper,
         }}
       >
         <div className={this.props.classes.drawerHeader}>

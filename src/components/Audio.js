@@ -1,10 +1,11 @@
-import React, { useRef } from 'react'
+import React, { useRef, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
 const propTypes = {
   accent: PropTypes.oneOf(['am', 'br']),
-  uri: PropTypes.string
+  uri: PropTypes.string,
+  play: PropTypes.bool
 }
 
 const ImageIcon = styled.div`
@@ -47,8 +48,14 @@ const onSoundClick = el => () => {
   el.current.play()
 }
 
-const Audio = ({ accent, uri }) => {
+const Audio = ({ accent, uri, play }) => {
   const audio = useRef(null)
+
+  useEffect(() => {
+    if (play && audio !== null) {
+      audio.current.play()
+    }
+  }, [accent, uri, play])
 
   return (
     <>
