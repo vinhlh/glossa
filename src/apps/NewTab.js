@@ -13,7 +13,7 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight'
 import {
   createMuiTheme,
   makeStyles,
-  ThemeProvider
+  ThemeProvider,
 } from '@material-ui/core/styles'
 import clsx from 'clsx'
 
@@ -26,6 +26,7 @@ import pink from '@material-ui/core/colors/pink'
 
 import configs from '../configs/firebase'
 import ItemCard from '../components/Card'
+import { useFeatureFlags } from '../helpers/featureFlag'
 
 const Container = styled.div`
   display: flex;
@@ -56,23 +57,23 @@ function shuffleArray(array) {
   return array
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   card: {
-    minWidth: 360
+    minWidth: 360,
   },
   expand: {
     transform: 'rotate(0deg)',
     marginLeft: 'auto',
     transition: theme.transitions.create('transform', {
-      duration: theme.transitions.duration.shortest
-    })
+      duration: theme.transitions.duration.shortest,
+    }),
   },
   expandOpen: {
-    transform: 'rotate(180deg)'
-  }
+    transform: 'rotate(180deg)',
+  },
 }))
 
 const useUserDataFromFirebase = () => {
@@ -82,7 +83,7 @@ const useUserDataFromFirebase = () => {
   useEffect(() => {
     firebase.initializeApp(configs)
 
-    firebase.auth().onAuthStateChanged(function(user) {
+    firebase.auth().onAuthStateChanged(function (user) {
       if (!user) {
         setCurrentUser(null)
         return
@@ -90,26 +91,26 @@ const useUserDataFromFirebase = () => {
 
       const { displayName } = user
       setCurrentUser({
-        displayName
+        displayName,
       })
 
       firebase
         .database()
         .ref('user_flashcards/' + user.uid)
-        .on('value', snapshot => {
+        .on('value', (snapshot) => {
           const words = snapshot.val()
           Promise.all(
-            Object.keys(words).map(w =>
+            Object.keys(words).map((w) =>
               firebase
                 .database()
                 .ref('words/' + w)
                 .once('value')
             )
           )
-            .then(snapshots =>
+            .then((snapshots) =>
               snapshots.reduce((all, s) => ({ ...all, [s.key]: s.val() }), {})
             )
-            .then(r => {
+            .then((r) => {
               console.warn('Synced', r)
               const words = shuffleArray(Object.values(r))
               setUserWords(words)
@@ -120,20 +121,20 @@ const useUserDataFromFirebase = () => {
 
   return {
     currentUser,
-    userWords
+    userWords,
   }
 }
 
 const TOPIC_ALL = 'All'
 
-const useWordsByTopic = userWords => {
+const useWordsByTopic = (userWords) => {
   const [activeTopic, setActiveTopic] = useState(TOPIC_ALL)
   const [activeIndex, setActiveIndex] = useState(0)
   const wordsByTopic = useMemo(
     () =>
       userWords.reduce(
         (prev, w) => {
-          ;(w.topics || []).forEach(t => {
+          ;(w.topics || []).forEach((t) => {
             prev[t] = [...(prev[t] || []), w]
             prev[TOPIC_ALL] = [...prev[TOPIC_ALL], w]
           })
@@ -152,7 +153,7 @@ const useWordsByTopic = userWords => {
     activeTopic,
     activeIndex,
     setActiveIndex,
-    setActiveTopic
+    setActiveTopic,
   }
 }
 
@@ -160,8 +161,8 @@ const theme = createMuiTheme({
   palette: {
     type: 'dark',
     primary: blue,
-    secondary: pink
-  }
+    secondary: pink,
+  },
 })
 
 const Chips = styled.div`
@@ -181,12 +182,14 @@ const NewTab = () => {
 
   const { userWords, currentUser } = useUserDataFromFirebase()
 
+  const { features } = useFeatureFlags()
+
   const {
     wordsByTopic,
     activeTopic,
     setActiveTopic,
     activeIndex,
-    setActiveIndex
+    setActiveIndex,
   } = useWordsByTopic(userWords)
   const maxIndex = wordsByTopic[activeTopic].length
 
@@ -195,7 +198,7 @@ const NewTab = () => {
 
   const onClickBack = () => activeIndex > 0 && setActiveIndex(activeIndex - 1)
 
-  const renderSearchResult = expanded => {
+  const renderSearchResult = (expanded) => {
     if (!userWords[activeIndex]) {
       return null
     }
@@ -223,16 +226,17 @@ const NewTab = () => {
                 </Hey>
 
                 <Chips>
-                  {Object.entries(wordsByTopic).map(([t, values]) => (
-                    <Chip
-                      avatar={<Avatar>{values.length}</Avatar>}
-                      label={`${t}`}
-                      key={t}
-                      variant="outlined"
-                      onClick={() => setActiveTopic(t) && setActiveIndex(0)}
-                      color={t === activeTopic ? 'primary' : ''}
-                    />
-                  ))}
+                  {features.displayTopics &&
+                    Object.entries(wordsByTopic).map(([t, values]) => (
+                      <Chip
+                        avatar={<Avatar>{values.length}</Avatar>}
+                        label={`${t}`}
+                        key={t}
+                        variant="outlined"
+                        onClick={() => setActiveTopic(t) && setActiveIndex(0)}
+                        color={t === activeTopic ? 'primary' : ''}
+                      />
+                    ))}
                 </Chips>
 
                 <Card className={classes.card}>
@@ -240,7 +244,7 @@ const NewTab = () => {
                     action={
                       <IconButton
                         className={clsx(classes.expand, {
-                          [classes.expandOpen]: expanded
+                          [classes.expandOpen]: expanded,
                         })}
                         onClick={handleExpandClick}
                         aria-expanded={expanded}
@@ -284,7 +288,10 @@ const NewTab = () => {
             )}
           </>
         ) : (
-          <Hey>You must login first!<br /> By clicking on the extension icon.</Hey>
+          <Hey>
+            You must login first!
+            <br /> By clicking on the extension icon.
+          </Hey>
         )}
       </Container>
     </ThemeProvider>

@@ -4,13 +4,15 @@ import InlineApp from './apps/Inline'
 import NewTab from './apps/NewTab'
 import Background from './apps/Background'
 import Popup from './apps/Popup'
+import Options from './apps/Options'
 
 const APP_SELECTOR_ID = 'glossa.ext'
 
 const AppsRegistered = {
   NewTab,
   Background,
-  Popup
+  Popup,
+  Options
 }
 
 const render = () => {
