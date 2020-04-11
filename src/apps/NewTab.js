@@ -16,6 +16,7 @@ import {
   ThemeProvider,
 } from '@material-ui/core/styles'
 import clsx from 'clsx'
+import CircularProgress from '@material-ui/core/CircularProgress'
 
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Chip from '@material-ui/core/Chip'
@@ -42,6 +43,7 @@ const Hey = styled.div`
   color: #fff;
   font-size: 16px;
   text-align: center;
+  margin-top: 32px;
   margin-bottom: 32px;
   line-height: 1.5;
 `
@@ -77,13 +79,17 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const useUserDataFromFirebase = () => {
+  const [authenticating, setAuthenticating] = useState(true)
+  const [loadingFlashcards, setLoadingFlashcards] = useState(true)
   const [currentUser, setCurrentUser] = useState(null)
   const [userWords, setUserWords] = useState([])
 
   useEffect(() => {
+    setAuthenticating(true)
     firebase.initializeApp(configs)
 
     firebase.auth().onAuthStateChanged(function (user) {
+      setAuthenticating(false)
       if (!user) {
         setCurrentUser(null)
         return
@@ -94,6 +100,7 @@ const useUserDataFromFirebase = () => {
         displayName,
       })
 
+      setLoadingFlashcards(true)
       firebase
         .database()
         .ref('user_flashcards/' + user.uid)
@@ -114,15 +121,13 @@ const useUserDataFromFirebase = () => {
               console.warn('Synced', r)
               const words = shuffleArray(Object.values(r))
               setUserWords(words)
+              setLoadingFlashcards(false)
             })
         })
     })
   }, [])
 
-  return {
-    currentUser,
-    userWords,
-  }
+  return { authenticating, loadingFlashcards, currentUser, userWords }
 }
 
 const TOPIC_ALL = 'All'
@@ -180,7 +185,12 @@ const NewTab = () => {
   const classes = useStyles()
   const [expanded, setExpanded] = React.useState(false)
 
-  const { userWords, currentUser } = useUserDataFromFirebase()
+  const {
+    authenticating,
+    loadingFlashcards,
+    userWords,
+    currentUser,
+  } = useUserDataFromFirebase()
 
   const { features } = useFeatureFlags()
 
@@ -210,89 +220,116 @@ const NewTab = () => {
     setExpanded(!expanded)
   }
 
+  const render = (children) => (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container>{children}</Container>
+    </ThemeProvider>
+  )
+
+  if (authenticating) {
+    return render(
+      <>
+        <CircularProgress />
+        <Hey>Validating session</Hey>
+      </>
+    )
+  }
+
+  if (loadingFlashcards) {
+    return render(
+      <>
+        <CircularProgress />
+        <Hey>Loading your flashcards</Hey>
+      </>
+    )
+  }
+
+  if (!currentUser) {
+    return render(
+      <Hey>
+        You must login first!
+        <br /> By clicking on the extension icon.
+      </Hey>
+    )
+  }
+
+  if (Object.keys(userWords).length === 0) {
+    return render(<Hey>You have no flashcard yet! Keep adding!</Hey>)
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Container>
-        {currentUser ? (
+        {
           <>
-            {Object.keys(userWords).length === 0 ? (
-              <Hey>You have no flashcard yet! Keep adding!</Hey>
-            ) : (
-              <>
-                <Hey>
-                  Hi <b>{currentUser.displayName}</b>,<br /> there are your
-                  flashcards! Try your best 💪
-                </Hey>
+            <Hey>
+              Hi <b>{currentUser.displayName}</b>,<br /> there are your
+              flashcards! Try your best 💪
+            </Hey>
 
-                <Chips>
-                  {features.displayTopics &&
-                    Object.entries(wordsByTopic).map(([t, values]) => (
-                      <Chip
-                        avatar={<Avatar>{values.length}</Avatar>}
-                        label={`${t}`}
-                        key={t}
-                        variant="outlined"
-                        onClick={() => setActiveTopic(t) && setActiveIndex(0)}
-                        color={t === activeTopic ? 'primary' : ''}
-                      />
-                    ))}
-                </Chips>
+            <Chips>
+              {features.displayTopics &&
+                Object.entries(wordsByTopic).map(([t, values]) => (
+                  <Chip
+                    avatar={<Avatar>{values.length}</Avatar>}
+                    label={`${t}`}
+                    key={t}
+                    variant="outlined"
+                    onClick={() => setActiveTopic(t) && setActiveIndex(0)}
+                    color={t === activeTopic ? 'primary' : ''}
+                  />
+                ))}
+            </Chips>
 
-                <Card className={classes.card}>
-                  <CardHeader
-                    action={
-                      <IconButton
-                        className={clsx(classes.expand, {
-                          [classes.expandOpen]: expanded,
-                        })}
-                        onClick={handleExpandClick}
-                        aria-expanded={expanded}
-                        aria-label="Show Phonetics"
-                      >
-                        <ExpandMoreIcon />
-                      </IconButton>
-                    }
-                  />
-                  <CardContent style={{ marginTop: -72 }}>
-                    {renderSearchResult(expanded)}
-                  </CardContent>
-                  <MobileStepper
-                    steps={maxIndex}
-                    position="static"
-                    variant="text"
-                    activeStep={activeIndex}
-                    nextButton={
-                      <Button
-                        size="small"
-                        onClick={onClickNext}
-                        disabled={activeIndex === maxIndex - 1}
-                      >
-                        Next
-                        <KeyboardArrowRight />
-                      </Button>
-                    }
-                    backButton={
-                      <Button
-                        size="small"
-                        onClick={onClickBack}
-                        disabled={activeIndex === 0}
-                      >
-                        <KeyboardArrowLeft />
-                        Back
-                      </Button>
-                    }
-                  />
-                </Card>
-              </>
-            )}
+            <Card className={classes.card}>
+              <CardHeader
+                action={
+                  <IconButton
+                    className={clsx(classes.expand, {
+                      [classes.expandOpen]: expanded,
+                    })}
+                    onClick={handleExpandClick}
+                    aria-expanded={expanded}
+                    aria-label="Show Phonetics"
+                  >
+                    <ExpandMoreIcon />
+                  </IconButton>
+                }
+              />
+              <CardContent style={{ marginTop: -72 }}>
+                {renderSearchResult(expanded)}
+              </CardContent>
+              <MobileStepper
+                steps={maxIndex}
+                position="static"
+                variant="text"
+                activeStep={activeIndex}
+                nextButton={
+                  <Button
+                    size="small"
+                    onClick={onClickNext}
+                    disabled={activeIndex === maxIndex - 1}
+                  >
+                    Next
+                    <KeyboardArrowRight />
+                  </Button>
+                }
+                backButton={
+                  <Button
+                    size="small"
+                    onClick={onClickBack}
+                    disabled={activeIndex === 0}
+                  >
+                    <KeyboardArrowLeft />
+                    Back
+                  </Button>
+                }
+              />
+            </Card>
           </>
-        ) : (
-          <Hey>
-            You must login first!
-            <br /> By clicking on the extension icon.
-          </Hey>
-        )}
+        }
       </Container>
     </ThemeProvider>
   )
