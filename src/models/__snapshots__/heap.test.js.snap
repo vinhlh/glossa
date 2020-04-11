@@ -1,0 +1,305 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MinHeap fromArray sorts array with one item 1`] = `
+Array [
+  Object {
+    "id": "component",
+    "score_days": 5,
+    "score_random": 1,
+  },
+]
+`;
+
+exports[`MinHeap fromArray sorts empty array 1`] = `Array []`;
+
+exports[`MinHeap fromArray sorts items with multiple items have same days properly 1`] = `
+Array [
+  Object {
+    "id": "wonder",
+    "score_days": 1,
+    "score_random": 5,
+  },
+  Object {
+    "id": "component",
+    "score_days": 2,
+    "score_random": 1,
+  },
+  Object {
+    "id": "hook",
+    "score_days": 2,
+    "score_random": 2,
+  },
+  Object {
+    "id": "walnut",
+    "score_days": 2,
+    "score_random": 4,
+  },
+  Object {
+    "id": "infrastructure",
+    "score_days": 2,
+    "score_random": 3,
+  },
+]
+`;
+
+exports[`MinHeap fromArray sorts items with multiple items have same days, same random score properly 1`] = `
+Array [
+  Object {
+    "id": "wonder",
+    "score_days": 1,
+    "score_random": 5,
+  },
+  Object {
+    "id": "component",
+    "score_days": 2,
+    "score_random": 3,
+  },
+  Object {
+    "id": "hook",
+    "score_days": 2,
+    "score_random": 3,
+  },
+  Object {
+    "id": "walnut",
+    "score_days": 2,
+    "score_random": 3,
+  },
+  Object {
+    "id": "infrastructure",
+    "score_days": 2,
+    "score_random": 3,
+  },
+]
+`;
+
+exports[`MinHeap fromArray sorts items with multiple items have unique days properly 1`] = `
+Array [
+  Object {
+    "id": "wonder",
+    "score_days": 1,
+    "score_random": 2,
+  },
+  Object {
+    "id": "walnut",
+    "score_days": 2,
+    "score_random": 2,
+  },
+  Object {
+    "id": "hook",
+    "score_days": 3,
+    "score_random": 2,
+  },
+  Object {
+    "id": "component",
+    "score_days": 5,
+    "score_random": 1,
+  },
+  Object {
+    "id": "infrastructure",
+    "score_days": 4,
+    "score_random": 2,
+  },
+]
+`;
+
+exports[`MinHeap many pushes then pop works correctly 1`] = `
+Array [
+  Object {
+    "id": "infrastructure",
+    "score_days": 1,
+    "score_random": 3,
+  },
+  Object {
+    "id": "wonder",
+    "score_days": 3,
+    "score_random": 5,
+  },
+  Object {
+    "id": "walnut",
+    "score_days": 2,
+    "score_random": 3,
+  },
+]
+`;
+
+exports[`MinHeap many pushes then pop works correctly 2`] = `
+Object {
+  "id": "infrastructure",
+  "score_days": 1,
+  "score_random": 3,
+}
+`;
+
+exports[`MinHeap many pushes then pop works correctly 3`] = `
+Array [
+  Object {
+    "id": "walnut",
+    "score_days": 2,
+    "score_random": 3,
+  },
+  Object {
+    "id": "wonder",
+    "score_days": 3,
+    "score_random": 5,
+  },
+]
+`;
+
+exports[`MinHeap push then pop works correctly 1`] = `
+Object {
+  "id": "wonder",
+  "score_days": 1,
+  "score_random": 5,
+}
+`;
+
+exports[`MinHeap so many pushes with many pop works correctly 1`] = `
+Array [
+  Object {
+    "id": "walnut",
+    "score_days": 2,
+    "score_random": 3,
+  },
+  Object {
+    "id": "wonder",
+    "score_days": 3,
+    "score_random": 5,
+  },
+  Object {
+    "id": "infrastructure",
+    "score_days": 8,
+    "score_random": 3,
+  },
+]
+`;
+
+exports[`MinHeap so many pushes with many pop works correctly 2`] = `
+Object {
+  "id": "walnut",
+  "score_days": 2,
+  "score_random": 3,
+}
+`;
+
+exports[`MinHeap so many pushes with many pop works correctly 3`] = `
+Array [
+  Object {
+    "id": "wonder",
+    "score_days": 3,
+    "score_random": 5,
+  },
+  Object {
+    "id": "infrastructure",
+    "score_days": 8,
+    "score_random": 3,
+  },
+]
+`;
+
+exports[`MinHeap so many pushes with many pop works correctly 4`] = `
+Array [
+  Object {
+    "id": "hook",
+    "score_days": 1,
+    "score_random": 3,
+  },
+  Object {
+    "id": "wonder",
+    "score_days": 3,
+    "score_random": 5,
+  },
+  Object {
+    "id": "component",
+    "score_days": 4,
+    "score_random": 3,
+  },
+  Object {
+    "id": "infrastructure",
+    "score_days": 8,
+    "score_random": 3,
+  },
+]
+`;
+
+exports[`MinHeap so many pushes with many pop works correctly 5`] = `
+Object {
+  "id": "hook",
+  "score_days": 1,
+  "score_random": 3,
+}
+`;
+
+exports[`MinHeap so many pushes with many pop works correctly 6`] = `
+Array [
+  Object {
+    "id": "wonder",
+    "score_days": 3,
+    "score_random": 5,
+  },
+  Object {
+    "id": "infrastructure",
+    "score_days": 8,
+    "score_random": 3,
+  },
+  Object {
+    "id": "component",
+    "score_days": 4,
+    "score_random": 3,
+  },
+]
+`;
+
+exports[`MinHeap so many pushes with many pop works correctly 7`] = `
+Object {
+  "id": "wonder",
+  "score_days": 3,
+  "score_random": 5,
+}
+`;
+
+exports[`MinHeap so many pushes with many pop works correctly 8`] = `
+Array [
+  Object {
+    "id": "component",
+    "score_days": 4,
+    "score_random": 3,
+  },
+  Object {
+    "id": "infrastructure",
+    "score_days": 8,
+    "score_random": 3,
+  },
+]
+`;
+
+exports[`MinHeap so many pushes with many pop works correctly 9`] = `
+Object {
+  "id": "component",
+  "score_days": 4,
+  "score_random": 3,
+}
+`;
+
+exports[`MinHeap so many pushes with many pop works correctly 10`] = `
+Array [
+  Object {
+    "id": "infrastructure",
+    "score_days": 8,
+    "score_random": 3,
+  },
+]
+`;
+
+exports[`MinHeap so many pushes with many pop works correctly 11`] = `
+Object {
+  "id": "infrastructure",
+  "score_days": 8,
+  "score_random": 3,
+}
+`;
+
+exports[`MinHeap so many pushes with many pop works correctly 12`] = `Array []`;
+
+exports[`MinHeap so many pushes with many pop works correctly 13`] = `null`;
+
+exports[`MinHeap so many pushes with many pop works correctly 14`] = `Array []`;
