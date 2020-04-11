@@ -1,7 +1,7 @@
 interface Item {
   id: string;
-  score_days: float;
-  score_random: int;
+  scoreDays: float;
+  scoreRandom: int;
   history: Array<int>;
 }
 
@@ -22,8 +22,8 @@ const getDaysTilNextTime = (
   b = -0.8,
   c = 0.28,
   d = 0.02,
-  assumed_score = 2.5,
-  min_score = 1.3,
+  assumedScore = 2.5,
+  minScore = 1.3,
   theta = 0.2
 ): int => {
   if (!history.length) {
@@ -36,11 +36,11 @@ const getDaysTilNextTime = (
     return 1
   }
 
-  // Calculate the latest consecutive answer num_consecutively_correct
-  let num_consecutively_correct = 0
+  // Calculate the latest consecutive answer numConsecutivelyCorrect
+  let numConsecutivelyCorrect = 0
   for (let i = last; i >= 0; i--) {
     if (history[i] >= 3) {
-      num_consecutively_correct++
+      numConsecutivelyCorrect++
     } else {
       break
     }
@@ -56,8 +56,8 @@ const getDaysTilNextTime = (
     Math.round(
       a *
         Math.pow(
-          Math.max(min_score, assumed_score + historySum),
-          theta * num_consecutively_correct
+          Math.max(minScore, assumedScore + historySum),
+          theta * numConsecutivelyCorrect
         ) *
         1000
     ) / 1000
@@ -119,8 +119,8 @@ class MinHeap {
   fromRawArray(rawItems: Array<Item>): Array<Item> {
     const items = rawItems.map(i => ({
       ...i,
-      score_days: getDaysTilNextTime(i.history),
-      score_random: this._random()
+      scoreDays: getDaysTilNextTime(i.history),
+      scoreRandom: this._random()
     }))
 
     return this.fromArray(items)
@@ -166,11 +166,11 @@ class MinHeap {
   }
 
   _less(a: Item, b: Item) {
-    if (a.score_days === b.score_days) {
-      return a.score_random < b.score_random
+    if (a.scoreDays === b.scoreDays) {
+      return a.scoreRandom < b.scoreRandom
     }
 
-    return a.score_days < b.score_days
+    return a.scoreDays < b.scoreDays
   }
 
   _swap(items: Array, a: int, b: int) {
