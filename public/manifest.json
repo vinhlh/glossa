@@ -32,7 +32,7 @@
     "48": "images/icon-48.png",
     "128": "images/icon-128.png"
   },
-  "content_security_policy": "script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'; media-src 'self' 'unsafe-inline'",
+  "content_security_policy": "script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'; media-src 'self' https://* 'unsafe-inline'",
     "oauth2": {
     "client_id": "",
     "scopes": [
