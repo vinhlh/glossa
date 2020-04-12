@@ -17,6 +17,7 @@ import {
 } from '@material-ui/core/styles'
 import clsx from 'clsx'
 import CircularProgress from '@material-ui/core/CircularProgress'
+import DeleteIcon from '@material-ui/icons/Close'
 
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Chip from '@material-ui/core/Chip'
@@ -95,8 +96,9 @@ const useUserDataFromFirebase = () => {
         return
       }
 
-      const { displayName } = user
+      const { uid, displayName } = user
       setCurrentUser({
+        uid,
         displayName,
       })
 
@@ -183,7 +185,7 @@ const Chips = styled.div`
 
 const NewTab = () => {
   const classes = useStyles()
-  const [expanded, setExpanded] = React.useState(false)
+  const [expanded, setExpanded] = useState(false)
 
   const {
     authenticating,
@@ -218,6 +220,18 @@ const NewTab = () => {
 
   const handleExpandClick = () => {
     setExpanded(!expanded)
+  }
+
+  const handleDeleteClick = () => {
+    if (!userWords[activeIndex]) {
+      return null
+    }
+
+    const { name } = userWords[activeIndex]
+    firebase
+      .database()
+      .ref(`user_flashcards/${currentUser.uid}/${name}`)
+      .remove()
   }
 
   const render = (children) => (
@@ -258,80 +272,78 @@ const NewTab = () => {
     return render(<Hey>You have no flashcard yet! Keep adding!</Hey>)
   }
 
-  return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Container>
-        {
-          <>
-            <Hey>
-              Hi <b>{currentUser.displayName}</b>,<br /> there are your
-              flashcards! Try your best 💪
-            </Hey>
+  return render(
+    <>
+      <Hey>
+        Hi <b>{currentUser.displayName}</b>,<br /> there are your flashcards!
+        Try your best 💪
+      </Hey>
 
-            <Chips>
-              {features.displayTopics &&
-                Object.entries(wordsByTopic).map(([t, values]) => (
-                  <Chip
-                    avatar={<Avatar>{values.length}</Avatar>}
-                    label={`${t}`}
-                    key={t}
-                    variant="outlined"
-                    onClick={() => setActiveTopic(t) && setActiveIndex(0)}
-                    color={t === activeTopic ? 'primary' : ''}
-                  />
-                ))}
-            </Chips>
+      <Chips>
+        {features.displayTopics &&
+          Object.entries(wordsByTopic).map(([t, values]) => (
+            <Chip
+              avatar={<Avatar>{values.length}</Avatar>}
+              label={`${t}`}
+              key={t}
+              variant="outlined"
+              onClick={() => setActiveTopic(t) && setActiveIndex(0)}
+              color={t === activeTopic ? 'primary' : ''}
+            />
+          ))}
+      </Chips>
 
-            <Card className={classes.card}>
-              <CardHeader
-                action={
-                  <IconButton
-                    className={clsx(classes.expand, {
-                      [classes.expandOpen]: expanded,
-                    })}
-                    onClick={handleExpandClick}
-                    aria-expanded={expanded}
-                    aria-label="Show Phonetics"
-                  >
-                    <ExpandMoreIcon />
-                  </IconButton>
-                }
-              />
-              <CardContent style={{ marginTop: -72 }}>
-                {renderSearchResult(expanded)}
-              </CardContent>
-              <MobileStepper
-                steps={maxIndex}
-                position="static"
-                variant="text"
-                activeStep={activeIndex}
-                nextButton={
-                  <Button
-                    size="small"
-                    onClick={onClickNext}
-                    disabled={activeIndex === maxIndex - 1}
-                  >
-                    Next
-                    <KeyboardArrowRight />
-                  </Button>
-                }
-                backButton={
-                  <Button
-                    size="small"
-                    onClick={onClickBack}
-                    disabled={activeIndex === 0}
-                  >
-                    <KeyboardArrowLeft />
-                    Back
-                  </Button>
-                }
-              />
-            </Card>
-          </>
-        }
-      </Container>
-    </ThemeProvider>
+      <Card className={classes.card}>
+        <CardHeader
+          action={
+            <>
+              <IconButton
+                className={clsx(classes.expand, {
+                  [classes.expandOpen]: expanded,
+                })}
+                onClick={handleExpandClick}
+                aria-expanded={expanded}
+                aria-label="Show Phonetics"
+              >
+                <ExpandMoreIcon />
+              </IconButton>
+              <IconButton onClick={handleDeleteClick} aria-label="Delete">
+                <DeleteIcon />
+              </IconButton>
+            </>
+          }
+        />
+        <CardContent style={{ marginTop: -72 }}>
+          {renderSearchResult(expanded)}
+        </CardContent>
+        <MobileStepper
+          steps={maxIndex}
+          position="static"
+          variant="text"
+          activeStep={activeIndex}
+          nextButton={
+            <Button
+              size="small"
+              onClick={onClickNext}
+              disabled={activeIndex === maxIndex - 1}
+            >
+              Next
+              <KeyboardArrowRight />
+            </Button>
+          }
+          backButton={
+            <Button
+              size="small"
+              onClick={onClickBack}
+              disabled={activeIndex === 0}
+            >
+              <KeyboardArrowLeft />
+              Back
+            </Button>
+          }
+        />
+      </Card>
+    </>
   )
 }
 
