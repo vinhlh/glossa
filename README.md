@@ -1,6 +1,13 @@
 # Glossa
 Create flashcards from Oxford Advanced Learner's Dictionary directly via Chrome extension
 
+> Try https://github.com/vinhlh/oxfordanki
+> 
+> Manage and generate Anki cards from Oxford dictionaries
+> 
+> https://anki.vinh.rocks/
+
+
 ## Features
 
 ### Select, Look up and Save
